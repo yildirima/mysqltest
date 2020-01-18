@@ -1,0 +1,58 @@
+First: create persistent volume that contains your SQL scripts
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: mysql-initdb-pv-volume
+  labels:
+    type: local
+    app: mysql
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Mi
+  accessModes:
+    - ReadOnlyMany
+  hostPath:
+    path: "/path/to/initdb/sql/scripts"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: mysql-initdb-pv-claim
+  labels:
+    app: mysql
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 1Mi
+      
+** Note: assume that you have your SQL scripts in /path/to/initdb/sql/scripts
+Second: mount the volume to /docker-entrypoint-initdb.d
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - mountPath: /docker-entrypoint-initdb.d
+              name: mysql-initdb
+      volumes:
+        - name: mysql-initdb
+          persistentVolumeClaim:
+            claimName: mysql-initdb-pv-claim
