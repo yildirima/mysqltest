@@ -20,7 +20,7 @@ spec:
           - name: mysql-data
             mountPath: /var/opt/data
   volumes:
-  - name: mysql-initdb
+  - name: mysql-data
     configMap:
             name: initdb
   - name: crypto-config
