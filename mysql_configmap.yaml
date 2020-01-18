@@ -4,4 +4,5 @@ metadata:
   name: initdb
 data:
   initdb.sql: |-
+      CREATE DATABASE test;
       GRANT ALL PRIVILEGES ON *.* TO 'test'@'localhost' IDENTIFIED BY 'r00t123';
